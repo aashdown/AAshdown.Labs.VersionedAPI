@@ -23,7 +23,7 @@ namespace AAshdown.Labs.VersionedAPI
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
-        {
+        { 
             // add versioned api support services
             services.AddVersionedApiSupport(Configuration);
 
@@ -33,7 +33,6 @@ namespace AAshdown.Labs.VersionedAPI
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IApiVersionDescriptionProvider apiDescription)
         { 
-
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();

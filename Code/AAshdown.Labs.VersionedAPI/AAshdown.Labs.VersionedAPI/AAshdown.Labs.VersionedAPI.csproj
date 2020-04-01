@@ -5,6 +5,18 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="API\V1\**" />
+    <Content Remove="API\V1\**" />
+    <EmbeddedResource Remove="API\V1\**" />
+    <None Remove="API\V1\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="API\V1\Controllers\NamesController.cs" />
+    <Compile Include="API\V1\Controllers\ValuesController.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Versioning" Version="4.1.1" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Versioning.ApiExplorer" Version="4.1.1" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="3.1.1" />

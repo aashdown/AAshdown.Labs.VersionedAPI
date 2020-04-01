@@ -17,20 +17,25 @@ namespace AAshdown.Labs.VersionedAPI.ApiDocs
     {
         public static void AddVersionedApiSupport(this IServiceCollection services, IConfiguration configuration)
         {
+            var apiVersion = new Version(Convert.ToString(configuration["DefaultApiVersion"]));
+
             services.AddApiVersioning(o => {
                 o.ApiVersionReader = ApiVersionReader.Combine(
                     new QueryStringApiVersionReader(),
                     new HeaderApiVersionReader(new string[] { "api-version" })
                 );
                 o.AssumeDefaultVersionWhenUnspecified = true;
-                var apiVersion = new Version(Convert.ToString(configuration["DefaultApiVersion"]));
                 o.DefaultApiVersion = new ApiVersion(apiVersion.Major, apiVersion.Minor);
                 o.ReportApiVersions = true;
                 o.Conventions.Add(new VersionByNamespaceConvention());
                 o.UseApiBehavior = true; // include only api controller not mvc controller.
-                o.ApiVersionSelector = new CurrentImplementationApiVersionSelector(o);
+                o.ApiVersionSelector = new DefaultApiVersionSelector(o);
             });
-            services.AddVersionedApiExplorer(); // It will be used to explorer api versioning and add custom text box in swagger to take version number.
+            services.AddVersionedApiExplorer(o => {
+                o.AddApiVersionParametersWhenVersionNeutral = false;
+                o.DefaultApiVersion = new ApiVersion(apiVersion.Major, apiVersion.Minor);
+                o.AssumeDefaultVersionWhenUnspecified = true;
+            }); // It will be used to explorer api versioning and add custom text box in swagger to take version number.
             services.AddSwaggerGenerationUI();
         }
         public static void AddSwaggerGenerationUI(this IServiceCollection services)
@@ -39,15 +44,21 @@ namespace AAshdown.Labs.VersionedAPI.ApiDocs
                              .GetRequiredService<IApiVersionDescriptionProvider>();
             services.AddSwaggerGen(action =>
             {
+                action.ResolveConflictingActions(x => x.First());
                 action.OrderActionsBy(orderBy => orderBy.HttpMethod);
                 //action.UseReferencedDefinitionsForEnums();
                 foreach (var item in provider.ApiVersionDescriptions)
                 {
-                    action.SwaggerDoc(item.GroupName, new Microsoft.OpenApi.Models.OpenApiInfo
+                    action.SwaggerDoc(item.GroupName, new OpenApiInfo
                     {
-                        Title = "Version-" + item.GroupName,
+                        Title = $"Example API (v{item.GroupName})",
                         Version = item.ApiVersion.MajorVersion.ToString() + "." + item.ApiVersion.MinorVersion
-                    });
+                    }); ;
+
+                    action.EnableAnnotations();
+
+                    action.OperationFilter<RemoveApiVersionParameterFilter>();
+                    action.DocumentFilter<AddApiVersionQueryStringParameterWithDefaultVersionFilter>();
                 }
             });
         }
@@ -56,18 +67,18 @@ namespace AAshdown.Labs.VersionedAPI.ApiDocs
         {
             applicationBuilder.UseSwagger(c =>
             {
-                c.RouteTemplate = "/api/help/versions/{documentname}/document.json";
+                c.RouteTemplate = "/apidoc/{documentname}/document.json";
 
                 //c.PreSerializeFilters.Add((swaggerDoc, httpReq) => swaggerDoc.Servers.Add(new OpenApiServer() { Url = "/api" }));
             });
 
             applicationBuilder.UseSwaggerUI(c =>
             {
-                c.RoutePrefix = "api/help";
+                c.RoutePrefix = "apidoc";
                 c.DocumentTitle = "Api Help";
                 foreach (var item in apiVersionDescriptionProvider.ApiVersionDescriptions)
                 {
-                    c.SwaggerEndpoint($"/api/help/versions/{item.GroupName}/document.json", item.GroupName);
+                    c.SwaggerEndpoint($"/apidoc/{item.GroupName}/document.json", item.GroupName);
                 }
             });
         }

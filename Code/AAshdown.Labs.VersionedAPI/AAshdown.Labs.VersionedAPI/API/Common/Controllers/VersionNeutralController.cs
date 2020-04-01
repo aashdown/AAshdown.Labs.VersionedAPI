@@ -5,21 +5,17 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
-namespace AAshdown.Labs.VersionedAPI.V2.Controllers
+namespace AAshdown.Labs.VersionedAPI.API.Common.Controllers
 {
+    [ApiVersionNeutral]
     [Route("api/[controller]")]
     [ApiController]
-    public class ValuesController : ControllerBase
+    public class VersionNeutralController : ControllerBase
     {
         [HttpGet]
-        public string[] Get()
+        public string Get()
         {
-            return new[]
-            {
-                "One:1",
-                "Two:2",
-                "Three:3",
-            };
+            return "Hello! I should exist in all versions of the API.";
         }
     }
 }

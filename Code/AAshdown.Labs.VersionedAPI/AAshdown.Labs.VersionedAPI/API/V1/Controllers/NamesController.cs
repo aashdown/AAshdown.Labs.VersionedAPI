@@ -5,20 +5,22 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
-namespace AAshdown.Labs.VersionedAPI.V3.Controllers
+namespace AAshdown.Labs.VersionedAPI.API.V1.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ValuesController : ControllerBase
+    public class NamesController : ControllerBase
     {
         [HttpGet]
         public string[] Get()
         {
             return new[]
             {
-                "One:1",
-                "Two:2",
-                "Three:3",
+                "Adam",
+                "Bob",
+                "Claire",
+                "Donna",
+                "Eric"
             };
         }
     }
